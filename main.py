@@ -106,6 +106,9 @@ class WarGame:
         self.main_state = 0
         self.speed = 10
 
+        self.p1_state = 0
+        self.p2_state = 0
+
     def PlayRound(self):
         pos = pygame.mouse.get_pos()
 
@@ -134,38 +137,42 @@ class WarGame:
         card2_state = self.cardbutton2.isClicked(pos, player2_card_target, self.main_state)
 
         if self.main_state == 0:
-            statemove0 = 0
-            if stack1_state == 1:
+            if self.p1_state == 0:
+                if stack1_state:
+                    screen.blit(scale_card_red, (self.movecardx1, self.movecardy1))
+                    if self.movecardx1 < 270:
+                        self.movecardx1 += self.speed
+                    elif self.movecardx1 >= 270 and self.movecardy1 < 160:
+                        self.movecardy1 += self.speed
+                    else:
+                        self.p1_state = 1
+            elif self.p1_state == 1:
                 screen.blit(scale_card_red, (self.movecardx1, self.movecardy1))
-                if self.movecardx1 < 270:
-                    self.movecardx1 += self.speed
-                elif self.movecardx1 >= 270 and self.movecardy1 < 160:
-                    self.movecardy1 += self.speed
-                    statemove0 += 1
+                if card1_state:
+                    p1_placed_card = pygame.transform.scale(image1, (192, 256))
+                    screen.blit(p1_placed_card, (270, 160))
 
-            if stack2_state == 1:
+            if self.p2_state == 0:
+                if stack2_state:
+                    screen.blit(scale_card_blue, (self.movecardx2, self.movecardy2))
+                    if self.movecardx2 > 494:
+                        self.movecardx2 -= self.speed
+                    elif self.movecardx2 <= 494 and self.movecardy2 < 160:
+                        self.movecardy2 += self.speed
+                    else:
+                        self.p2_state = 1
+            elif self.p2_state == 1:
                 screen.blit(scale_card_blue, (self.movecardx2, self.movecardy2))
-                if self.movecardx2 > 494:
-                    self.movecardx2 -= self.speed
-                elif self.movecardx2 <= 494 and self.movecardy2 < 160:
-                    self.movecardy2 += self.speed
-                    statemove0 += 1
-            
-            if statemove0 <= 2:
-                if card1_state == 1:
-                    pass
+                if card2_state:
+                    p2_placed_card = pygame.transform.scale(image2, (192, 256))
+                    screen.blit(p2_placed_card, (494, 160))
 
-                if card2_state == 1:
-                    pass
+            if card1_state and card2_state:
+                self.main_state = 1
 
-        if self.main_state == 1:    
-            if card1_state == 1:
-                scale_p1 = pygame.transform.scale(image1, (240, 320))
-                screen.blit(scale_p1, (50, 110))
-
-            if card2_state == 1:
-                scale_p2 = pygame.transform.scale(image2, (240, 320))
-                screen.blit(scale_p2, (670, 110))
+        elif self.main_state == 1:
+            if True:
+                pass
 
         """ 
         When you come back to work on this add individual functionality for each card
@@ -173,53 +180,30 @@ class WarGame:
         player 2 to have both actions performed first.
         Also add when winner is chosen cards both flip to winner's color and then they
         slide under winners deck.
-        """
 
-        if self.main_state == 11:
-            if self.main_state == 1:
-                player1_scale_card = pygame.transform.scale(self.red_card, (240, 320))
-                screen.blit(player1_scale_card, (self.movecardx1, self.movecardy1))
-                if self.movecardx1 >= 45:
-                    self.movecardx1 -= 10
-                elif self.movecardx1 <= 45 and self.movecardy1 <= 120:
-                    self.movecardy1 += 10
-                if self.movecardx2 <= 670:
-                    self.movecardx2 += 10
-                elif self.movecardx2 >= 670 and self.movecardy2 <= 120:
-                    self.movecardy2 += 10
-
-                player2_scale_card = pygame.transform.scale(self.red_card, (240, 320))
-                screen.blit(player2_scale_card, (self.movecardx2, self.movecardy2))
-                if self.movecardx1 >= 45:
-                    self.movecardx1 -= 10
-                elif self.movecardx1 <= 45 and self.movecardy1 <= 120:
-                    self.movecardy1 += 10
-                if self.movecardx2 <= 670:
-                    self.movecardx2 += 10
-                elif self.movecardx2 >= 670 and self.movecardy2 <= 120:
-                    self.movecardy2 += 10
+        Previous code to refrence
         
-        elif self.main_state == 12:
-            scale_p1 = pygame.transform.scale(image1, (240, 320))
-            screen.blit(scale_p1, (50, 110))
+        scale_p1 = pygame.transform.scale(image1, (240, 320))
+        screen.blit(scale_p1, (50, 110))
 
-            scale_p2 = pygame.transform.scale(image2, (240, 320))
-            screen.blit(scale_p2, (670, 110))
+        scale_p2 = pygame.transform.scale(image2, (240, 320))
+        screen.blit(scale_p2, (670, 110))
 
-            self.movecardx1, self.movecardy1 = 357.5, 65
-            self.movecardx2, self.movecardy2 = 357.5, 65
+        self.movecardx1, self.movecardy1 = 357.5, 65
+        self.movecardx2, self.movecardy2 = 357.5, 65
 
-        elif self.main_state == 13:
-            self.main_state = 0
-            repr(self.deck1.take_card())
-            repr(self.deck1.take_card())
+        self.main_state = 0
+        repr(self.deck1.take_card())
+        repr(self.deck1.take_card())
+        
+        """
 
 class CardButton:
     def __init__(self):
         self.clicked = False
         self.letgo = False
         self.card_move = 0
-        self.game_state = 0
+        self.game_state = False
 
     def isClicked(self, pos, card_target, mainstate):
         if card_target.collidepoint(pos):
@@ -228,7 +212,7 @@ class CardButton:
                 self.letgo = True
         
         if pygame.mouse.get_pressed()[0] == 0 and self.letgo == True:
-            self.game_state += 1
+            self.game_state = not self.game_state
             self.card_move = 1
             self.letgo = False
         elif pygame.mouse.get_pressed()[0] == 0:
