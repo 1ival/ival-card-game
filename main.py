@@ -78,6 +78,8 @@ class Game:
             clock.tick(60)  # limits FPS to 60
         pygame.quit()
 
+""""ADD WAR TIE FUNCTIONALITY 
+    LINE 220"""
 class WarGame:
     def __init__(self):
         self.deck1 = Deck()
@@ -90,8 +92,13 @@ class WarGame:
         self.red_cardstack = pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/red1_stack.png").convert_alpha()
         self.blue_cardstack = pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/blue1_stack.png").convert_alpha()
 
-        self.red_card= pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/red1.png").convert_alpha()
-        self.blue_card= pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/blue1.png").convert_alpha()
+        self.red_card = pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/red1.png").convert_alpha()
+        self.blue_card = pygame.image.load("C:/Users/ivalm/newgame/img/cards_back/blue1.png").convert_alpha()
+
+        self.player1wins_text = pygame.image.load("C:/Users/ivalm/newgame/img/buttons_text/player1wins.png").convert_alpha()
+        self.player2wins_text = pygame.image.load("C:/Users/ivalm/newgame/img/buttons_text/player2wins.png").convert_alpha()
+
+        self.arrow_symbol = pygame.image.load("C:/Users/ivalm/newgame/img/buttons_text/arrow_button.png").convert_alpha()
 
         self.movecardx1, self.movecardy1 = 40, 120
         self.movecardx2, self.movecardy2 = 724, 120
@@ -103,11 +110,15 @@ class WarGame:
         self.stackbutton2 = CardButton()
         self.cardbutton1 = CardButton()
         self.cardbutton2 = CardButton()
+        self.windowbutton = CardButton()
+        self.arrowbutton = CardButton()
         self.main_state = 0
         self.speed = 10
 
         self.p1_state = 0
         self.p2_state = 0
+
+        self.clock = pygame.time.Clock()
 
     def PlayRound(self):
         pos = pygame.mouse.get_pos()
@@ -126,15 +137,29 @@ class WarGame:
         scale_card_red = pygame.transform.scale(self.red_card, (192, 256))
         scale_card_blue = pygame.transform.scale(self.blue_card, (192, 256))
 
+        arrow_buttonscale = pygame.transform.scale(self.arrow_symbol, (80, 50))
+
+        arrow_button_target = arrow_buttonscale.get_rect(center=(480, 465))
+
         player1_deck_target = scale_stackcard_red.get_rect(center=(138, 268))
         player2_deck_target = scale_stackcard_blue.get_rect(center=(822, 268))
         player1_card_target = scale_card_red.get_rect(center=(366, 288))
         player2_card_target = scale_card_blue.get_rect(center=(590, 288))
 
-        stack1_state = self.stackbutton1.isClicked(pos, player1_deck_target, self.main_state)
-        stack2_state = self.stackbutton2.isClicked(pos, player2_deck_target, self.main_state)
-        card1_state = self.cardbutton1.isClicked(pos, player1_card_target, self.main_state)
-        card2_state = self.cardbutton2.isClicked(pos, player2_card_target, self.main_state)
+        arrow_button_state = self.arrowbutton.isClicked(pos, arrow_button_target)
+        window_state = self.windowbutton.isClicked(pos, pygame.Rect(0, 0, window_width, window_height))
+
+        p1_placed_card = pygame.transform.scale(image1, (192, 256))
+        p2_placed_card = pygame.transform.scale(image2, (192, 256))
+
+        p1_wins_text = pygame.transform.scale(self.player1wins_text, (324, 108))
+        p2_wins_text = pygame.transform.scale(self.player2wins_text, (324, 108))
+
+        stack1_state = self.stackbutton1.isClicked(pos, player1_deck_target)
+        stack2_state = self.stackbutton2.isClicked(pos, player2_deck_target)
+
+        card1_state = self.cardbutton1.isClicked(pos, player1_card_target)
+        card2_state = self.cardbutton2.isClicked(pos, player2_card_target)
 
         if self.main_state == 0:
             if self.p1_state == 0:
@@ -149,7 +174,6 @@ class WarGame:
             elif self.p1_state == 1:
                 screen.blit(scale_card_red, (self.movecardx1, self.movecardy1))
                 if card1_state:
-                    p1_placed_card = pygame.transform.scale(image1, (192, 256))
                     screen.blit(p1_placed_card, (270, 160))
 
             if self.p2_state == 0:
@@ -164,39 +188,82 @@ class WarGame:
             elif self.p2_state == 1:
                 screen.blit(scale_card_blue, (self.movecardx2, self.movecardy2))
                 if card2_state:
-                    p2_placed_card = pygame.transform.scale(image2, (192, 256))
                     screen.blit(p2_placed_card, (494, 160))
 
             if card1_state and card2_state:
                 self.main_state = 1
 
         elif self.main_state == 1:
-            if True:
-                pass
+            screen.blit(p1_placed_card, (270, 160))
+            screen.blit(p2_placed_card, (494, 160))
+            if window_state:
+                self.main_state = 2
+                    
+        elif self.main_state == 2:
+            if player1_card > player2_card:
+                screen.blit(p1_wins_text, (318, 18))
+                screen.blit(scale_card_red, (self.movecardx1, self.movecardy1))
+                screen.blit(scale_card_red, (self.movecardx2, self.movecardy2))
+                screen.blit(arrow_buttonscale, (440, 440))
+                if arrow_button_state:
+                    self.main_state = 3
+                
+            elif player2_card > player1_card:
+                screen.blit(p2_wins_text, (318, 18))
+                screen.blit(scale_card_blue, (self.movecardx2, self.movecardy2))
+                screen.blit(scale_card_blue, (self.movecardx1, self.movecardy1))
+                screen.blit(arrow_buttonscale, (440, 440))
+                if arrow_button_state:
+                    self.main_state = 3
+            
+            else:
+                # ADD WAR TIE FUNCTIONALITY
+                self.main_state = 4
 
-        """ 
-        When you come back to work on this add individual functionality for each card
-        so player1 cand have card moved and then flipped but from there futher action requires
-        player 2 to have both actions performed first.
-        Also add when winner is chosen cards both flip to winner's color and then they
-        slide under winners deck.
+        elif self.main_state == 3:
+            if player1_card > player2_card:
+                screen.blit(scale_card_red, (self.movecardx1, self.movecardy1))
+                screen.blit(scale_card_red, (self.movecardx2, self.movecardy2))  
+                if self.movecardx1 > 40:
+                    self.movecardx1 -= self.speed
+                elif self.movecardx2 > 40:
+                    self.movecardx2 -= self.speed
+                else:
+                    self.player2_cards.insert(0, player1_card)
+                    self.player2_cards.insert(0, player2_card)
+                    self.main_state = 4
+                screen.blit(scale_stackcard_red, (40, 120))
 
-        Previous code to refrence
-        
-        scale_p1 = pygame.transform.scale(image1, (240, 320))
-        screen.blit(scale_p1, (50, 110))
+            elif player2_card > player1_card:
+                screen.blit(scale_card_blue, (self.movecardx2, self.movecardy2))
+                screen.blit(scale_card_blue, (self.movecardx1, self.movecardy1))
+                if self.movecardx2 < 724:
+                    self.movecardx2 += self.speed
+                elif self.movecardx1 < 724:
+                    self.movecardx1 += self.speed
+                else:
+                    self.player2_cards.insert(0, player2_card)
+                    self.player2_cards.insert(0, player1_card)
+                    self.main_state = 4
+                screen.blit(scale_stackcard_blue, (724, 120))
 
-        scale_p2 = pygame.transform.scale(image2, (240, 320))
-        screen.blit(scale_p2, (670, 110))
+        elif self.main_state == 4:
+            self.player1_cards.pop()
+            self.player2_cards.pop()
 
-        self.movecardx1, self.movecardy1 = 357.5, 65
-        self.movecardx2, self.movecardy2 = 357.5, 65
+            self.movecardx1, self.movecardy1 = 40, 120
+            self.movecardx2, self.movecardy2 = 724, 120
+            self.p1_state = 0
+            self.p2_state = 0
 
-        self.main_state = 0
-        repr(self.deck1.take_card())
-        repr(self.deck1.take_card())
-        
-        """
+            self.stackbutton1.game_state = False
+            self.stackbutton2.game_state = False
+            self.cardbutton1.game_state = False
+            self.cardbutton2.game_state = False
+            self.arrowbutton.game_state = False
+            self.windowbutton.game_state = False
+
+            self.main_state = 0
 
 class CardButton:
     def __init__(self):
@@ -205,7 +272,7 @@ class CardButton:
         self.card_move = 0
         self.game_state = False
 
-    def isClicked(self, pos, card_target, mainstate):
+    def isClicked(self, pos, card_target):
         if card_target.collidepoint(pos):
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
